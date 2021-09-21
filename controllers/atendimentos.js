@@ -2,7 +2,9 @@ const Atendimentos = require('../models/atendimentos');
 
 
 module.exports = app => {
-  app.get('/atendimentos', (req, res) => res.send('Voce esta na rota de Atendendimentos'));
+  app.get('/atendimentos', (req, res) => {
+    Atendimentos.lista(res);
+  });
 
   app.post('/atendimentos', (req, res) =>{
     const atendimento = req.body;
