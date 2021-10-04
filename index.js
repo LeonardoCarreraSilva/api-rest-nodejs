@@ -1,6 +1,6 @@
 const custonEpress = require('./config/constonEpress');
-const conexao = require('./infraestrotura/conexao');
-const tabelas = require('./infraestrotura/tabelas');
+const conexao = require('./infraestrotura/database/conexao');
+const tabelas = require('./infraestrotura/database/tabelas');
 conexao.connect(erro =>{
   if(erro){
     console.log(erro)
