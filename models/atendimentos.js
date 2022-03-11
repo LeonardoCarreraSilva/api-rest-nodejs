@@ -1,7 +1,7 @@
 const { default: axios } = require("axios");
 const moment = require("moment");
 const conexao = require("../infraestrotura/database/conexao");
-const repositorio = require("../repositorios/atendimentos");
+const repositorio = require("../repositorios/atendimentosRepositories");
 
 class Atendimentos {
   constructor() {
@@ -16,18 +16,24 @@ class Atendimentos {
         valido: this.clienteEhValido,
         menssagem: "Cliente deve ter pelo menos cinco caracteres",
       },
+      {
+        nome: "atendimento",
+        valido: this.clienteEhValido,
+        menssagem: "Atendimento não encontrado",
+      },
     ];
     this.dataEhValida = ({ data, dataCriacao }) =>
       moment(data).isSameOrAfter(dataCriacao);
     this.clienteEhValido = (tamanho) => tamanho >= 5;
+    this.atendimentoEhValido = (tamanho) => tamanho === 0;
 
-    this.valida = parametros =>
-            this.validacoes.filter(campo => {
-                const { nome } = campo
-                const parametro = parametros[nome]
+    this.valida = (parametros) =>
+      this.validacoes.filter((campo) => {
+        const { nome } = campo;
+        const parametro = parametros[nome];
 
-                return !campo.valido(parametro)
-            })
+        return !campo.valido(parametro);
+      });
   }
 
   adicionar(atendimento, res) {
@@ -60,22 +66,10 @@ class Atendimentos {
     return repositorio.lista();
   }
 
-  buscaPorId(id, res) {
-    const sql = `select * from Atendimentos where id = ${id}`;
-
-    conexao.query(sql, async (erro, resultado) => {
-      const atendimento = resultado[0];
-      const cpf = atendimento.cliente;
-
-      if (erro) {
-        res.status(400).json(erro);
-      } else {
-        const { data } = await axios.get(`http://localhost:8082/${cpf}`);
-        atendimento.cliente = data;
-        res.status(200).json(atendimento);
-      }
-    });
+  buscaPorId(atendimento) {
+    return repositorio.buscarPorId(atendimento).then((resultados) => resultados).catch((erros) => erros);
   }
+
   altera(id, valores, res) {
     if (valores.data) {
       valores.data = moment(valores.data, "DD/MM/YYYY").format(
